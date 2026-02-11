@@ -1,1867 +1,1846 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Facility Performance Reporting System</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
-
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        color: #333;
-        line-height: 1.6;
-        padding: 20px;
-        min-height: 100vh;
-    }
-
-    .container {
-        max-width: 1400px;
-        margin: 0 auto;
-        background: white;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-    }
-
-    header {
-        background: linear-gradient(135deg, #243b55 0%, #141e30 100%);
-        color: white;
-        padding: 25px 30px;
-        border-bottom: 5px solid #28a745;
-    }
-
-    header h1 {
-        font-size: 28px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-    }
-
-    header .subtitle {
-        font-size: 16px;
-        opacity: 0.9;
-        font-weight: 300;
-    }
-
-    .app-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px 30px;
-        background: #f8f9fa;
-        border-bottom: 1px solid #e0e0e0;
-    }
-
-    .tabs {
-        display: flex;
-        gap: 5px;
-        background: #e9ecef;
-        padding: 5px;
-        border-radius: 10px;
-    }
-
-    .tab-btn {
-        padding: 10px 20px;
-        background: transparent;
-        border: none;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        color: #495057;
-        transition: all 0.3s;
-    }
-
-    .tab-btn.active {
-        background: white;
-        color: #243b55;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-    }
-
-    .auth-section {
-        display: flex;
-        gap: 10px;
-        align-items: center;
-    }
-
-    .user-info {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        font-size: 14px;
-    }
-
-    .content-area {
-        display: flex;
-        min-height: 600px;
-    }
-
-    .sidebar {
-        width: 350px;
-        background: #f8f9fa;
-        padding: 25px;
-        border-right: 1px solid #e0e0e0;
-        flex-shrink: 0;
-    }
-
-    .main-content {
-        flex: 1;
-        padding: 25px;
-        background: white;
-        overflow: hidden;
-    }
-
-    .tab-content {
-        display: none;
-    }
-
-    .tab-content.active {
-        display: block;
-        animation: fadeIn 0.5s ease;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    .card {
-        background: white;
-        border-radius: 10px;
-        padding: 20px;
-        margin-bottom: 20px;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        border: 1px solid #e0e0e0;
-    }
-
-    .card h3 {
-        color: #243b55;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 600;
-        color: #495057;
-        font-size: 14px;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 10px 15px;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 14px;
-        transition: border-color 0.3s;
-    }
-
-    .form-control:focus {
-        border-color: #243b55;
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(36, 59, 85, 0.1);
-    }
-
-    select.form-control {
-        appearance: none;
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-        background-repeat: no-repeat;
-        background-position: right 10px center;
-        background-size: 16px;
-        padding-right: 35px;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        border: none;
-        border-radius: 6px;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        font-size: 14px;
-    }
-
-    .btn-primary {
-        background: #243b55;
-        color: white;
-    }
-
-    .btn-primary:hover {
-        background: #1a2d42;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(36, 59, 85, 0.2);
-    }
-
-    .btn-success {
-        background: #28a745;
-        color: white;
-    }
-
-    .btn-success:hover {
-        background: #218838;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.2);
-    }
-
-    .btn-info {
-        background: #17a2b8;
-        color: white;
-    }
-
-    .btn-info:hover {
-        background: #138496;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(23, 162, 184, 0.2);
-    }
-
-    .btn-warning {
-        background: #ffc107;
-        color: #212529;
-    }
-
-    .btn-warning:hover {
-        background: #e0a800;
-        transform: translateY(-2px);
-    }
-
-    .btn-danger {
-        background: #dc3545;
-        color: white;
-    }
-
-    .btn-danger:hover {
-        background: #c82333;
-        transform: translateY(-2px);
-    }
-
-    .btn-block {
-        width: 100%;
-        justify-content: center;
-    }
-
-    .log-list {
-        max-height: 400px;
-        overflow-y: auto;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-    }
-
-    .log-item {
-        padding: 15px;
-        border-bottom: 1px solid #f0f0f0;
-        transition: background 0.3s;
-    }
-
-    .log-item:hover {
-        background: #f8f9fa;
-    }
-
-    .log-item:last-child {
-        border-bottom: none;
-    }
-
-    .log-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 8px;
-    }
-
-    .log-equipment {
-        font-weight: 600;
-        color: #243b55;
-        font-size: 16px;
-    }
-
-    .log-date {
-        font-size: 12px;
-        color: #6c757d;
-    }
-
-    .log-details {
-        font-size: 14px;
-        color: #495057;
-        margin-bottom: 8px;
-    }
-
-    .log-status {
-        display: inline-block;
-        padding: 3px 8px;
-        border-radius: 4px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .status-normal {
-        background: #d4edda;
-        color: #155724;
-    }
-
-    .status-intermittent {
-        background: #fff3cd;
-        color: #856404;
-    }
-
-    .status-failure {
-        background: #f8d7da;
-        color: #721c24;
-    }
-
-    .status-disruption {
-        background: #cce5ff;
-        color: #004085;
-    }
-
-    .log-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 10px;
-    }
-
-    .log-actions button {
-        padding: 4px 8px;
-        font-size: 12px;
-    }
-
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
-        margin-bottom: 25px;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 10px;
-        padding: 15px;
-        text-align: center;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
-        border-top: 4px solid #243b55;
-    }
-
-    .stat-value {
-        font-size: 28px;
-        font-weight: 700;
-        color: #243b55;
-        margin: 10px 0;
-    }
-
-    .stat-label {
-        font-size: 14px;
-        color: #6c757d;
-        font-weight: 600;
-    }
-
-    .report-container {
-        width: 100%;
-        overflow-x: auto;
-        margin: 20px 0;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        background: white;
-    }
-
-    .report-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 12px;
-        min-width: 800px;
-    }
-
-    .report-table th {
-        background: #243b55;
-        color: white;
-        text-align: center;
-        padding: 8px 4px;
-        font-weight: 600;
-        border: 1px solid #1a2d42;
-        white-space: nowrap;
-    }
-
-    .report-table td {
-        padding: 6px 3px;
-        border: 1px solid #dee2e6;
-        text-align: center;
-        vertical-align: middle;
-    }
-
-    .report-table tr:nth-child(even) {
-        background: #f8f9fa;
-    }
-
-    .report-table tr:hover {
-        background: #e9ecef;
-    }
-
-    .status-cell {
-        font-weight: bold;
-        font-size: 11px;
-        width: 30px;
-        height: 30px;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-    }
-
-    .status-O {
-        background-color: #90ee90 !important;
-        color: #155724;
-        border: 1px solid #155724;
-    }
-
-    .status-- {
-        background-color: #ffff99 !important;
-        color: #856404;
-        border: 1px solid #856404;
-    }
-
-    .status-X {
-        background-color: #ff9999 !important;
-        color: #721c24;
-        border: 1px solid #721c24;
-    }
-
-    .status-V {
-        background-color: #99ccff !important;
-        color: #004085;
-        border: 1px solid #004085;
-    }
-
-    .report-controls {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    .legend {
-        display: flex;
-        gap: 15px;
-        flex-wrap: wrap;
-        margin-top: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-
-    .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 13px;
-    }
-
-    .legend-color {
-        width: 20px;
-        height: 20px;
-        border-radius: 4px;
-    }
-
-    .empty-state {
-        text-align: center;
-        padding: 40px 20px;
-        color: #6c757d;
-    }
-
-    .modal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .modal-content {
-        background: white;
-        border-radius: 10px;
-        width: 90%;
-        max-width: 500px;
-        max-height: 90vh;
-        overflow-y: auto;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    }
-
-    .modal-header {
-        padding: 20px;
-        background: #243b55;
-        color: white;
-        border-radius: 10px 10px 0 0;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .modal-body {
-        padding: 20px;
-    }
-
-    .close-modal {
-        background: transparent;
-        border: none;
-        color: white;
-        font-size: 24px;
-        cursor: pointer;
-    }
-
-    footer {
-        padding: 20px;
-        text-align: center;
-        color: #6c757d;
-        font-size: 14px;
-        border-top: 1px solid #e0e0e0;
-        margin-top: 30px;
-    }
-
-    .auth-modal {
-        max-width: 400px;
-    }
-
-    .login-form {
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-    }
-
-    .notification {
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        background: #28a745;
-        color: white;
-        border-radius: 8px;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-        display: none;
-    }
-
-    @keyframes slideIn {
-        from { transform: translateX(100%); opacity: 0; }
-        to { transform: translateX(0); opacity: 1; }
-    }
-
-    @keyframes slideOut {
-        from { transform: translateX(0); opacity: 1; }
-        to { transform: translateX(100%); opacity: 0; }
-    }
-
-    @media screen and (max-width: 1200px) {
-        .content-area {
-            flex-direction: column;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facility Performance Reporting System</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Reset and base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        .sidebar {
-            width: 100%;
-            border-right: none;
-            border-bottom: 1px solid #e0e0e0;
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
-        
-        .app-controls {
-            flex-direction: column;
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            min-height: 90vh;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             gap: 15px;
-            align-items: flex-start;
         }
-        
-        .auth-section {
-            width: 100%;
-            justify-content: space-between;
-        }
-    }
 
-    @media screen and (max-width: 768px) {
-        .stats-container {
-            grid-template-columns: repeat(2, 1fr);
+        .subtitle {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 20px;
         }
-        
+
+        /* Auth Section */
+        .auth-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            color: white;
+        }
+
+        .user-email {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* Tabs */
         .tabs {
+            display: flex;
+            background: #f5f5f5;
+            padding: 5px;
+            border-radius: 10px;
+            margin: 20px;
             flex-wrap: wrap;
         }
-        
+
         .tab-btn {
             flex: 1;
-            min-width: 120px;
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
-    }
 
-    @media screen and (max-width: 576px) {
+        .tab-btn:hover {
+            background: rgba(26, 35, 126, 0.1);
+        }
+
+        .tab-btn.active {
+            background: white;
+            color: #1a237e;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Main Content */
+        .content-area {
+            display: flex;
+            min-height: 600px;
+            flex-wrap: wrap;
+        }
+
+        .sidebar {
+            width: 100%;
+            max-width: 350px;
+            background: #f8f9fa;
+            padding: 25px;
+            border-right: 1px solid #e0e0e0;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 25px;
+            min-width: 300px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        .card h3 {
+            color: #1a237e;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 18px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #444;
+            font-size: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #1a237e;
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #00b894 0%, #00a085 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fdcb6e 0%, #fdcb6e 100%);
+            color: #2d3436;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #e17055 0%, #d63031 100%);
+            color: white;
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, #0984e3 0%, #0984e3 100%);
+            color: white;
+        }
+
+        .btn-block {
+            width: 100%;
+            justify-content: center;
+        }
+
+        /* Log List */
+        .log-list {
+            max-height: 500px;
+            overflow-y: auto;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        .log-item {
+            padding: 20px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: all 0.3s;
+        }
+
+        .log-item:hover {
+            background: #f8f9fa;
+        }
+
+        .log-item:last-child {
+            border-bottom: none;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .log-equipment {
+            font-weight: 700;
+            color: #1a237e;
+            font-size: 16px;
+        }
+
+        .log-date {
+            font-size: 12px;
+            color: #666;
+            background: #f0f0f0;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .log-details {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .log-status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .status-normal {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-intermittent {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-failure {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-disruption {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .log-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        /* Stats */
         .stats-container {
-            grid-template-columns: 1fr;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
         }
-        
-        body {
-            padding: 10px;
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-top: 4px solid;
+            border-image: linear-gradient(135deg, #1a237e, #283593) 1;
         }
-    }
-</style>
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a237e;
+            margin: 15px 0;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        /* Tables */
+        .report-container {
+            width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .report-table th {
+            background: #1a237e;
+            color: white;
+            padding: 12px 8px;
+            font-weight: 600;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+
+        .report-table td {
+            padding: 10px 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .report-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .status-cell {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        /* Empty States */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .modal-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #1a237e 0%, #283593 100%);
+            color: white;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 25px;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #666;
+            border-top: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a237e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content-area {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                max-width: 100%;
+                border-right: none;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .tabs {
+                margin: 10px;
+            }
+            
+            .tab-btn {
+                min-width: 120px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 500;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            z-index: 2000;
+            display: none;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .notification.success {
+            background: linear-gradient(135deg, #00b894, #00a085);
+        }
+
+        .notification.error {
+            background: linear-gradient(135deg, #e17055, #d63031);
+        }
+
+        .notification.info {
+            background: linear-gradient(135deg, #0984e3, #0984e3);
+        }
+
+        /* Print Styles */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .report-container, .report-container * {
+                visibility: visible;
+            }
+            .report-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1><span>📊</span> Facility Performance Reporting System</h1>
-        <div class="subtitle">Daily Log Management & Monthly Performance Reporting</div>
-    </header>
-    
-    <div class="app-controls">
-        <div class="tabs">
-            <button class="tab-btn active" onclick="switchTab('daily-log')" id="tab-daily-log">📝 Daily Log</button>
-            <button class="tab-btn" onclick="switchTab('monthly-report')" id="tab-monthly-report">📈 Monthly Report</button>
-            <button class="tab-btn" onclick="switchTab('failure-report')" id="tab-failure-report">🚨 Failure Report</button>
-            <button class="tab-btn" onclick="switchTab('data-management')" id="tab-data-management">💾 Data Management</button>
-        </div>
-        
-        <div class="auth-section">
-            <div id="user-info" class="user-info" style="display: none;">
-                <span id="user-email"></span>
-                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
-            </div>
-            <div id="login-section">
-                <button class="btn btn-primary" onclick="showLoginModal()">Login</button>
-                <button class="btn btn-success" onclick="showRegisterModal()">Register</button>
-            </div>
-        </div>
-    </div>
-    
-    <div class="content-area">
-        <div class="sidebar">
-            <!-- Daily Log Tab -->
-            <div id="daily-log" class="tab-content active">
-                <div class="card">
-                    <h3><span>➕</span> Add New Log Entry</h3>
-                    
-                    <div class="form-group">
-                        <label for="log-description">Log Description</label>
-                        <textarea id="log-description" class="form-control" rows="3" placeholder="Describe the issue or observation"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="equipment">Equipment</label>
-                        <select id="equipment" class="form-control">
-                            <option value="">Select Equipment</option>
-                            <option value="PSR">PSR - SALALAH AIRPORT</option>
-                            <option value="MSSR-S">MSSR-S - SALALAH AIRPORT</option>
-                            <option value="MSSR">MSSR - QAIROON HAIRITI</option>
-                            <option value="SMR">SMR - SALALAH AIRPORT</option>
-                            <option value="M-LAT">M-LAT - SALALAH AIRPORT</option>
-                            <option value="ADS-B">ADS-B - SALALAH AIRPORT</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="status">Status</label>
-                        <select id="status" class="form-control">
-                            <option value="">Select Status</option>
-                            <option value="O">Normal Operation</option>
-                            <option value="-">Intermittent/Decreased Operation</option>
-                            <option value="X">Failure Operation</option>
-                            <option value="V">Disruption on Supporting Equipment</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="failure-hours">Failure Hours (if applicable)</label>
-                        <input type="number" id="failure-hours" class="form-control" placeholder="Enter hours" min="0" step="0.5">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="remarks">Remarks</label>
-                        <input type="text" id="remarks" class="form-control" placeholder="Additional notes">
-                    </div>
-                    
-                    <button class="btn btn-primary btn-block" onclick="addLog()">
-                        <span>➕</span> Add Log Entry
+    <div class="container">
+        <header>
+            <h1>
+                <span>📊</span>
+                Facility Performance Reporting System
+            </h1>
+            <div class="subtitle">Daily Log Management & Monthly Performance Reporting</div>
+            
+            <div class="auth-section" id="auth-section">
+                <div id="user-info" class="user-info" style="display: none;">
+                    <span class="user-email" id="user-email"></span>
+                    <button class="btn btn-danger" onclick="logout()">
+                        <span>🚪</span> Logout
+                    </button>
+                </div>
+                <div id="login-buttons">
+                    <button class="btn btn-primary" onclick="showLoginModal()">
+                        <span>🔑</span> Login
+                    </button>
+                    <button class="btn btn-success" onclick="showRegisterModal()">
+                        <span>📝</span> Register
                     </button>
                 </div>
             </div>
-            
-            <!-- Monthly Report Tab -->
-            <div id="monthly-report" class="tab-content">
-                <div class="card">
-                    <h3><span>⚙️</span> Report Settings</h3>
-                    
-                    <div class="form-group">
-                        <label for="report-month">Select Month</label>
-                        <input type="month" id="report-month" class="form-control">
-                    </div>
-                    
-                    <button class="btn btn-success btn-block" onclick="generateMonthlyReport()">
-                        <span>📊</span> Generate Report
-                    </button>
-                    
-                    <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn btn-info" onclick="exportToExcel()">
-                            <span>📊</span> Export to Excel
-                        </button>
-                        
-                        <button class="btn btn-warning" onclick="printReport()">
-                            <span>🖨️</span> Print Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Failure Report Tab -->
-            <div id="failure-report" class="tab-content">
-                <div class="card">
-                    <h3><span>🚨</span> Failure & Corrective Action Report</h3>
-                    
-                    <div class="form-group">
-                        <label for="failure-date">Date</label>
-                        <input type="date" id="failure-date" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="location">Location/Site Name</label>
-                        <input type="text" id="location" class="form-control" value="SALALAH AIRPORT">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="facility">Facility</label>
-                        <input type="text" id="facility" class="form-control" value="SILL RADAR">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="failure-equipment">Equipment Name</label>
-                        <select id="failure-equipment" class="form-control">
-                            <option value="PSR">PSR</option>
-                            <option value="MSSR-S">MSSR-S</option>
-                            <option value="MSSR">MSSR</option>
-                            <option value="SMR">SMR</option>
-                            <option value="M-LAT">M-LAT</option>
-                            <option value="ADS-B">ADS-B</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="part-of-equipment">Part of Equipment Name</label>
-                        <input type="text" id="part-of-equipment" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="failure-category">Failure Category</label>
-                        <input type="number" id="failure-category" class="form-control" value="1">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="failure-description">Failure Description</label>
-                        <textarea id="failure-description" class="form-control" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="corrective-action">Corrective Action By</label>
-                        <textarea id="corrective-action" class="form-control" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="cause-of-failure">Cause of Failure</label>
-                        <input type="text" id="cause-of-failure" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="date-of-failure">Date of Failure</label>
-                        <input type="date" id="date-of-failure" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="time-of-failure">Time of Failure (HH:MM)</label>
-                        <input type="time" id="time-of-failure" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="date-of-corrective-action">Date of Corrective Action</label>
-                        <input type="date" id="date-of-corrective-action" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="time-of-corrective-action">Time of Corrective Action Complete</label>
-                        <input type="time" id="time-of-corrective-action" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="total-failure-hours">Total Failure Hours (Min)</label>
-                        <input type="text" id="total-failure-hours" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="problem-code">Problem Code</label>
-                        <input type="text" id="problem-code" class="form-control">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="note">Note</label>
-                        <textarea id="note" class="form-control" rows="2"></textarea>
-                    </div>
-                    
-                    <button class="btn btn-primary btn-block" onclick="addFailureReport()">
-                        <span>🚨</span> Create Failure Report
-                    </button>
-                </div>
-            </div>
-            
-            <!-- Data Management Tab -->
-            <div id="data-management" class="tab-content">
-                <div class="card">
-                    <h3><span>📊</span> System Statistics</h3>
-                    
-                    <div class="stats-container" id="system-stats">
-                        <div class="stat-card">
-                            <div class="stat-label">Total Log Entries</div>
-                            <div class="stat-value" id="stat-total-logs">0</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-label">This Month</div>
-                            <div class="stat-value" id="stat-this-month">0</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-label">Failure Hours</div>
-                            <div class="stat-value" id="stat-failure-hours">0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="main-content">
-            <!-- Daily Log Content -->
-            <div id="daily-log-content" class="tab-content active">
-                <div class="card">
-                    <h3><span>📋</span> Recent Log Entries</h3>
-                    
-                    <div id="log-list" class="log-list">
-                        <div class="empty-state">
-                            <span>📝</span>
-                            <h4>No log entries yet</h4>
-                            <p>Add your first log entry using the form on the left</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Monthly Report Content -->
-            <div id="monthly-report-content" class="tab-content">
-                <div class="card report-card">
-                    <div class="report-controls">
-                        <div class="month-selector">
-                            <span id="report-month-display">Select a month to generate report</span>
-                        </div>
-                    </div>
-                    
-                    <div id="report-output">
-                        <div class="empty-state">
-                            <span>📊</span>
-                            <h4>No report generated yet</h4>
-                            <p>Select a month and click "Generate Report" to create a monthly performance report</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Failure Report Content -->
-            <div id="failure-report-content" class="tab-content">
-                <div class="card">
-                    <h3><span>🚨</span> Failure Reports History</h3>
-                    
-                    <div id="failure-report-list" class="log-list">
-                        <div class="empty-state">
-                            <span>📋</span>
-                            <h4>No failure reports yet</h4>
-                            <p>Create your first failure report using the form on the left</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Data Management Content -->
-            <div id="data-management-content" class="tab-content">
-                <div class="card">
-                    <h3><span>📅</span> Recent Activity</h3>
-                    <div id="recent-activity">Loading...</div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Legend -->
-    <div style="padding: 15px 30px; background: #f8f9fa; border-top: 1px solid #e0e0e0;">
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-color status-O"></div>
-                <span>Normal Operation (O)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status--"></div>
-                <span>Intermittent/Decreased Operation (-)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-X"></div>
-                <span>Failure Operation (X)</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-color status-V"></div>
-                <span>Disruption on Supporting Equipment (V)</span>
-            </div>
-        </div>
-    </div>
-    
-    <footer>
-        <p>Facility Performance Reporting System | © 2025 Salalah Airport</p>
-    </footer>
-</div>
+        </header>
 
-<!-- Login Modal -->
-<div id="login-modal" class="modal">
-    <div class="modal-content auth-modal">
-        <div class="modal-header">
-            <h3><span>🔐</span> Login</h3>
-            <button class="close-modal" onclick="closeModal('login-modal')">&times;</button>
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('daily-log')">
+                <span>📝</span> Daily Log
+            </button>
+            <button class="tab-btn" onclick="switchTab('monthly-report')">
+                <span>📈</span> Monthly Report
+            </button>
+            <button class="tab-btn" onclick="switchTab('failure-report')">
+                <span>🚨</span> Failure Report
+            </button>
+            <button class="tab-btn" onclick="switchTab('data-management')">
+                <span>💾</span> Data Management
+            </button>
         </div>
-        <div class="modal-body">
-            <div class="login-form">
+
+        <div class="content-area">
+            <div class="sidebar">
+                <!-- Daily Log Tab -->
+                <div id="daily-log" class="tab-content active">
+                    <div class="card">
+                        <h3><span>➕</span> Add New Log Entry</h3>
+                        
+                        <div class="form-group">
+                            <label for="log-description">Log Description *</label>
+                            <textarea id="log-description" class="form-control" rows="3" placeholder="Describe the issue or observation..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="equipment">Equipment *</label>
+                            <select id="equipment" class="form-control" required>
+                                <option value="">Select Equipment</option>
+                                <option value="PSR">PSR - SALALAH AIRPORT</option>
+                                <option value="MSSR-S">MSSR-S - SALALAH AIRPORT</option>
+                                <option value="MSSR">MSSR - QAIROON HAIRITI</option>
+                                <option value="SMR">SMR - SALALAH AIRPORT</option>
+                                <option value="M-LAT">M-LAT - SALALAH AIRPORT</option>
+                                <option value="ADS-B">ADS-B - SALALAH AIRPORT</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="status">Status *</label>
+                            <select id="status" class="form-control" required>
+                                <option value="">Select Status</option>
+                                <option value="O">Normal Operation (O)</option>
+                                <option value="-">Intermittent/Decreased Operation (-)</option>
+                                <option value="X">Failure Operation (X)</option>
+                                <option value="V">Disruption on Supporting Equipment (V)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="failure-hours">Failure Hours (if applicable)</label>
+                            <input type="number" id="failure-hours" class="form-control" placeholder="Enter hours" min="0" step="0.5">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="remarks">Remarks</label>
+                            <input type="text" id="remarks" class="form-control" placeholder="Additional notes...">
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" onclick="addLog()">
+                            <span>➕</span> Add Log Entry
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Monthly Report Tab -->
+                <div id="monthly-report" class="tab-content">
+                    <div class="card">
+                        <h3><span>⚙️</span> Report Settings</h3>
+                        
+                        <div class="form-group">
+                            <label for="report-month">Select Month *</label>
+                            <input type="month" id="report-month" class="form-control" required>
+                        </div>
+                        
+                        <button class="btn btn-success btn-block" onclick="generateMonthlyReport()">
+                            <span>📊</span> Generate Report
+                        </button>
+                        
+                        <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-info" onclick="exportToCSV()">
+                                <span>📥</span> Export to CSV
+                            </button>
+                            
+                            <button class="btn btn-warning" onclick="printReport()">
+                                <span>🖨️</span> Print Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure Report Tab -->
+                <div id="failure-report" class="tab-content">
+                    <div class="card">
+                        <h3><span>🚨</span> Failure Report</h3>
+                        
+                        <div class="form-group">
+                            <label for="failure-date">Date *</label>
+                            <input type="date" id="failure-date" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="failure-location">Location *</label>
+                            <input type="text" id="failure-location" class="form-control" value="SALALAH AIRPORT" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="failure-equipment">Equipment *</label>
+                            <select id="failure-equipment" class="form-control" required>
+                                <option value="PSR">PSR</option>
+                                <option value="MSSR-S">MSSR-S</option>
+                                <option value="MSSR">MSSR</option>
+                                <option value="SMR">SMR</option>
+                                <option value="M-LAT">M-LAT</option>
+                                <option value="ADS-B">ADS-B</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="failure-description">Failure Description *</label>
+                            <textarea id="failure-description" class="form-control" rows="3" placeholder="Describe the failure..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="corrective-action">Corrective Action *</label>
+                            <textarea id="corrective-action" class="form-control" rows="3" placeholder="Describe corrective action..." required></textarea>
+                        </div>
+                        
+                        <button class="btn btn-primary btn-block" onclick="addFailureReport()">
+                            <span>🚨</span> Create Failure Report
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Data Management Tab -->
+                <div id="data-management" class="tab-content">
+                    <div class="card">
+                        <h3><span>📊</span> System Statistics</h3>
+                        
+                        <div class="stats-container" id="system-stats">
+                            <div class="stat-card">
+                                <div class="stat-label">Total Log Entries</div>
+                                <div class="stat-value" id="stat-total-logs">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-label">This Month</div>
+                                <div class="stat-value" id="stat-this-month">0</div>
+                            </div>
+                            
+                            <div class="stat-card">
+                                <div class="stat-label">Failure Hours</div>
+                                <div class="stat-value" id="stat-failure-hours">0</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3><span>🔄</span> Data Actions</h3>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
+                            <button class="btn btn-info" onclick="exportAllData()">
+                                <span>💾</span> Export All Data
+                            </button>
+                            
+                            <button class="btn btn-warning" onclick="clearOldData()">
+                                <span>🗑️</span> Clear Old Data (30+ days)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="main-content">
+                <!-- Daily Log Content -->
+                <div id="daily-log-content" class="tab-content active">
+                    <div class="card">
+                        <h3><span>📋</span> Recent Log Entries</h3>
+                        
+                        <div id="log-list" class="log-list">
+                            <div class="empty-state">
+                                <span>📝</span>
+                                <h4>No log entries yet</h4>
+                                <p>Add your first log entry using the form on the left</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Report Content -->
+                <div id="monthly-report-content" class="tab-content">
+                    <div class="card">
+                        <div class="report-controls" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                            <h3 id="report-month-display">Select a month to generate report</h3>
+                        </div>
+                        
+                        <div id="report-output">
+                            <div class="empty-state">
+                                <span>📊</span>
+                                <h4>No report generated yet</h4>
+                                <p>Select a month and click "Generate Report" to create a monthly performance report</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Failure Report Content -->
+                <div id="failure-report-content" class="tab-content">
+                    <div class="card">
+                        <h3><span>🚨</span> Failure Reports</h3>
+                        
+                        <div id="failure-report-list" class="log-list">
+                            <div class="empty-state">
+                                <span>📋</span>
+                                <h4>No failure reports yet</h4>
+                                <p>Create your first failure report using the form on the left</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Management Content -->
+                <div id="data-management-content" class="tab-content">
+                    <div class="card">
+                        <h3><span>📈</span> Performance Overview</h3>
+                        <div id="performance-chart" style="padding: 20px;">
+                            <canvas id="chart" width="400" height="200"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="card">
+                        <h3><span>📅</span> Recent Activity</h3>
+                        <div id="recent-activity" class="log-list">
+                            <div class="empty-state">
+                                <span>🔄</span>
+                                <p>No recent activity</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>Facility Performance Reporting System | © 2024 Salalah Airport</p>
+            <p style="margin-top: 8px; font-size: 12px; color: #888;">Secure cloud-based management system</p>
+        </footer>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span>🔑</span> Login</h3>
+                <button class="close-modal" onclick="closeModal('login-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
                 <div class="form-group">
-                    <label for="login-email">Email</label>
-                    <input type="email" id="login-email" class="form-control" placeholder="Enter your email">
+                    <label for="login-email">Email *</label>
+                    <input type="email" id="login-email" class="form-control" placeholder="your@email.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" class="form-control" placeholder="Enter your password">
+                    <label for="login-password">Password *</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="Enter password" required>
                 </div>
                 <button class="btn btn-primary btn-block" onclick="login()">Login</button>
+                <p style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
+                    Don't have an account? <a href="#" onclick="showRegisterModal()" style="color: #1a237e; font-weight: 500;">Register here</a>
+                </p>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Register Modal -->
-<div id="register-modal" class="modal">
-    <div class="modal-content auth-modal">
-        <div class="modal-header">
-            <h3><span>📝</span> Register</h3>
-            <button class="close-modal" onclick="closeModal('register-modal')">&times;</button>
-        </div>
-        <div class="modal-body">
-            <div class="login-form">
+    <!-- Register Modal -->
+    <div id="register-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><span>📝</span> Create Account</h3>
+                <button class="close-modal" onclick="closeModal('register-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
                 <div class="form-group">
-                    <label for="register-name">Full Name</label>
-                    <input type="text" id="register-name" class="form-control" placeholder="Enter your full name">
+                    <label for="register-name">Full Name *</label>
+                    <input type="text" id="register-name" class="form-control" placeholder="John Doe" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-email">Email</label>
-                    <input type="email" id="register-email" class="form-control" placeholder="Enter your email">
+                    <label for="register-email">Email *</label>
+                    <input type="email" id="register-email" class="form-control" placeholder="your@email.com" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" class="form-control" placeholder="Enter your password">
+                    <label for="register-password">Password *</label>
+                    <input type="password" id="register-password" class="form-control" placeholder="Create password" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-confirm-password">Confirm Password</label>
-                    <input type="password" id="register-confirm-password" class="form-control" placeholder="Confirm your password">
+                    <label for="register-confirm-password">Confirm Password *</label>
+                    <input type="password" id="register-confirm-password" class="form-control" placeholder="Confirm password" required>
                 </div>
-                <button class="btn btn-success btn-block" onclick="register()">Register</button>
+                <button class="btn btn-success btn-block" onclick="register()">Create Account</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Notification -->
-<div id="notification" class="notification"></div>
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
 
-<script>
-    // Supabase Configuration
-    const SUPABASE_URL = 'https://hwtkwpltdymcjsrqrxxj.supabase.co'; // Replace with your Supabase URL
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3dGt3cGx0ZHltY2pzcnFyeHhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3Njg2MTMsImV4cCI6MjA4NjM0NDYxM30.8d1quNY9V_5mk8kqcCPiDNipKM7i5Jk4OfE2gALJP_8'; // Replace with your Supabase anon key
-    
-    // Initialize Supabase client
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    
-    // Global state
-    let currentUser = null;
-    let logs = [];
-    let failureReports = [];
-    
-    // Initialize the application
-    async function initApp() {
-        // Check if user is already logged in
-        const { data: { session } } = await supabase.auth.getSession();
+    <script>
+        // Supabase Configuration (Test Project - Replace with your own)
+        const SUPABASE_URL = 'https://hwtkwpltdymcjsrqrxxj.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh3dGt3cGx0ZHltY2pzcnFyeHhqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA3Njg2MTMsImV4cCI6MjA4NjM0NDYxM30.8d1quNY9V_5mk8kqcCPiDNipKM7i5Jk4OfE2gALJP_8';
         
-        if (session) {
-            currentUser = session.user;
-            updateAuthUI();
-            await loadData();
-        } else {
-            showLoginModal();
-        }
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         
-        // Set current date
-        const today = new Date();
-        document.getElementById('failure-date').value = today.toISOString().split('T')[0];
-        document.getElementById('date-of-failure').value = today.toISOString().split('T')[0];
-        document.getElementById('date-of-corrective-action').value = today.toISOString().split('T')[0];
+        // Global state
+        let currentUser = null;
+        let userData = {};
         
-        // Set report month to current month
-        const currentMonth = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-        document.getElementById('report-month').value = currentMonth;
-    }
-    
-    // Update authentication UI
-    function updateAuthUI() {
-        if (currentUser) {
-            document.getElementById('user-info').style.display = 'flex';
-            document.getElementById('login-section').style.display = 'none';
-            document.getElementById('user-email').textContent = currentUser.email;
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initApp);
+        
+        async function initApp() {
+            // Check for existing session
+            const { data: { session } } = await supabase.auth.getSession();
             
-            // Enable tabs for logged-in users
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.disabled = false;
-            });
-        } else {
-            document.getElementById('user-info').style.display = 'none';
-            document.getElementById('login-section').style.display = 'flex';
+            if (session) {
+                currentUser = session.user;
+                updateAuthUI();
+                await loadUserData();
+            } else {
+                showLoginModal();
+            }
             
-            // Disable tabs for non-logged-in users
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                if (btn.id !== 'tab-daily-log') {
-                    btn.disabled = true;
-                }
-            });
-        }
-    }
-    
-    // Show login modal
-    function showLoginModal() {
-        document.getElementById('login-modal').style.display = 'flex';
-    }
-    
-    // Show register modal
-    function showRegisterModal() {
-        document.getElementById('register-modal').style.display = 'flex';
-    }
-    
-    // Close modal
-    function closeModal(modalId) {
-        document.getElementById(modalId).style.display = 'none';
-    }
-    
-    // Login function
-    async function login() {
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        
-        if (!email || !password) {
-            showNotification('Please enter email and password', 'error');
-            return;
+            // Set default dates
+            const today = new Date();
+            document.getElementById('failure-date').value = today.toISOString().split('T')[0];
+            document.getElementById('report-month').value = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
         }
         
-        try {
-            const { data, error } = await supabase.auth.signInWithPassword({
-                email: email,
-                password: password
-            });
-            
-            if (error) throw error;
-            
-            currentUser = data.user;
-            updateAuthUI();
-            closeModal('login-modal');
-            await loadData();
-            showNotification('Logged in successfully!', 'success');
-        } catch (error) {
-            showNotification(error.message, 'error');
-        }
-    }
-    
-    // Register function
-    async function register() {
-        const name = document.getElementById('register-name').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const confirmPassword = document.getElementById('register-confirm-password').value;
-        
-        if (!name || !email || !password) {
-            showNotification('Please fill all fields', 'error');
-            return;
-        }
-        
-        if (password !== confirmPassword) {
-            showNotification('Passwords do not match', 'error');
-            return;
-        }
-        
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email: email,
-                password: password,
-                options: {
-                    data: {
-                        full_name: name
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('user-info').style.display = 'flex';
+                document.getElementById('login-buttons').style.display = 'none';
+                document.getElementById('user-email').textContent = currentUser.email;
+                
+                // Enable all tabs
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+            } else {
+                document.getElementById('user-info').style.display = 'none';
+                document.getElementById('login-buttons').style.display = 'flex';
+                
+                // Disable tabs except login
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    if (!btn.textContent.includes('Daily Log')) {
+                        btn.disabled = true;
                     }
-                }
-            });
-            
-            if (error) throw error;
-            
-            showNotification('Registration successful! Please check your email to confirm your account.', 'success');
+                });
+            }
+        }
+        
+        function showLoginModal() {
+            document.getElementById('login-modal').style.display = 'flex';
             closeModal('register-modal');
-            showLoginModal();
-        } catch (error) {
-            showNotification(error.message, 'error');
         }
-    }
-    
-    // Logout function
-    async function logout() {
-        try {
-            const { error } = await supabase.auth.signOut();
-            if (error) throw error;
-            
-            currentUser = null;
-            updateAuthUI();
-            logs = [];
-            failureReports = [];
-            loadLogs();
-            loadFailureReports();
-            showNotification('Logged out successfully', 'success');
-            showLoginModal();
-        } catch (error) {
-            showNotification(error.message, 'error');
+        
+        function showRegisterModal() {
+            document.getElementById('register-modal').style.display = 'flex';
+            closeModal('login-modal');
         }
-    }
-    
-    // Load all data
-    async function loadData() {
-        await Promise.all([
-            loadLogs(),
-            loadFailureReports(),
-            updateSystemStats()
-        ]);
-    }
-    
-    // Load logs from Supabase
-    async function loadLogs() {
-        if (!currentUser) return;
         
-        try {
-            const { data, error } = await supabase
-                .from('logs')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            
-            logs = data || [];
-            displayLogs();
-        } catch (error) {
-            console.error('Error loading logs:', error);
-            showNotification('Error loading logs', 'error');
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
         }
-    }
-    
-    // Display logs in UI
-    function displayLogs() {
-        const logList = document.getElementById('log-list');
         
-        if (!logList) return;
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            if (!email || !password) {
+                showNotification('Please enter email and password', 'error');
+                return;
+            }
+            
+            showNotification('Logging in...', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signInWithPassword({
+                    email,
+                    password
+                });
+                
+                if (error) throw error;
+                
+                currentUser = data.user;
+                updateAuthUI();
+                closeModal('login-modal');
+                await loadUserData();
+                showNotification('Welcome back!', 'success');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
         
-        if (logs.length === 0) {
-            logList.innerHTML = `
+        async function register() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            if (!name || !email || !password) {
+                showNotification('Please fill all fields', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('Passwords do not match', 'error');
+                return;
+            }
+            
+            showNotification('Creating account...', 'info');
+            
+            try {
+                const { data, error } = await supabase.auth.signUp({
+                    email,
+                    password,
+                    options: {
+                        data: { full_name: name }
+                    }
+                });
+                
+                if (error) throw error;
+                
+                showNotification('Account created! Please check your email for verification.', 'success');
+                closeModal('register-modal');
+                showLoginModal();
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+        
+        async function logout() {
+            showNotification('Logging out...', 'info');
+            
+            try {
+                const { error } = await supabase.auth.signOut();
+                if (error) throw error;
+                
+                currentUser = null;
+                userData = {};
+                updateAuthUI();
+                clearUserData();
+                showLoginModal();
+                showNotification('Logged out successfully', 'success');
+            } catch (error) {
+                showNotification(error.message, 'error');
+            }
+        }
+        
+        async function loadUserData() {
+            if (!currentUser) return;
+            
+            // Load logs
+            await loadLogs();
+            
+            // Load failure reports
+            await loadFailureReports();
+            
+            // Update statistics
+            await updateStatistics();
+            
+            // Update recent activity
+            updateRecentActivity();
+        }
+        
+        function clearUserData() {
+            // Clear all user data from UI
+            document.getElementById('log-list').innerHTML = `
                 <div class="empty-state">
                     <span>📝</span>
                     <h4>No log entries yet</h4>
                     <p>Add your first log entry using the form on the left</p>
                 </div>
             `;
-            return;
-        }
-        
-        let html = '';
-        logs.forEach(log => {
-            const statusClass = `status-${log.status}`;
-            const statusText = getStatusText(log.status);
-            const date = new Date(log.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-            });
             
-            html += `
-                <div class="log-item" data-id="${log.id}">
-                    <div class="log-header">
-                        <div class="log-equipment">${log.equipment}</div>
-                        <div class="log-date">${date}</div>
-                    </div>
-                    <div class="log-details">
-                        ${log.description}
-                        ${log.remarks ? `<br><strong>Remarks:</strong> ${log.remarks}` : ''}
-                        ${log.failure_hours > 0 ? `<br><strong>Failure Hours:</strong> ${log.failure_hours}` : ''}
-                    </div>
-                    <div class="log-status ${statusClass}">${statusText}</div>
-                    <div class="log-actions">
-                        <button class="btn btn-danger btn-sm" onclick="deleteLog('${log.id}')">
-                            <span>🗑️</span> Delete
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-        
-        logList.innerHTML = html;
-    }
-    
-    // Add new log
-    async function addLog() {
-        if (!currentUser) {
-            showNotification('Please login first', 'error');
-            return;
-        }
-        
-        const description = document.getElementById('log-description').value.trim();
-        const equipment = document.getElementById('equipment').value;
-        const status = document.getElementById('status').value;
-        const failureHours = parseFloat(document.getElementById('failure-hours').value) || 0;
-        const remarks = document.getElementById('remarks').value.trim();
-        
-        if (!description || !equipment || !status) {
-            showNotification('Please fill in all required fields', 'error');
-            return;
-        }
-        
-        try {
-            const { data, error } = await supabase
-                .from('logs')
-                .insert([{
-                    user_id: currentUser.id,
-                    description: description,
-                    equipment: equipment,
-                    status: status,
-                    failure_hours: failureHours,
-                    remarks: remarks,
-                    created_at: new Date().toISOString()
-                }])
-                .select();
-            
-            if (error) throw error;
-            
-            // Clear form
-            document.getElementById('log-description').value = '';
-            document.getElementById('equipment').value = '';
-            document.getElementById('status').value = '';
-            document.getElementById('failure-hours').value = '';
-            document.getElementById('remarks').value = '';
-            
-            // Reload logs
-            await loadLogs();
-            await updateSystemStats();
-            showNotification('Log entry added successfully!', 'success');
-        } catch (error) {
-            console.error('Error adding log:', error);
-            showNotification('Error adding log entry', 'error');
-        }
-    }
-    
-    // Delete log
-    async function deleteLog(logId) {
-        if (!confirm('Are you sure you want to delete this log entry?')) return;
-        
-        try {
-            const { error } = await supabase
-                .from('logs')
-                .delete()
-                .eq('id', logId)
-                .eq('user_id', currentUser.id);
-            
-            if (error) throw error;
-            
-            await loadLogs();
-            await updateSystemStats();
-            showNotification('Log entry deleted successfully!', 'success');
-        } catch (error) {
-            console.error('Error deleting log:', error);
-            showNotification('Error deleting log entry', 'error');
-        }
-    }
-    
-    // Load failure reports
-    async function loadFailureReports() {
-        if (!currentUser) return;
-        
-        try {
-            const { data, error } = await supabase
-                .from('failure_reports')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            
-            failureReports = data || [];
-            displayFailureReports();
-        } catch (error) {
-            console.error('Error loading failure reports:', error);
-            showNotification('Error loading failure reports', 'error');
-        }
-    }
-    
-    // Display failure reports
-    function displayFailureReports() {
-        const reportList = document.getElementById('failure-report-list');
-        
-        if (!reportList) return;
-        
-        if (failureReports.length === 0) {
-            reportList.innerHTML = `
+            document.getElementById('failure-report-list').innerHTML = `
                 <div class="empty-state">
                     <span>📋</span>
                     <h4>No failure reports yet</h4>
                     <p>Create your first failure report using the form on the left</p>
                 </div>
             `;
-            return;
-        }
-        
-        let html = '';
-        failureReports.forEach(report => {
-            const date = new Date(report.created_at).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-            });
             
-            html += `
-                <div class="log-item" data-id="${report.id}">
-                    <div class="log-header">
-                        <div class="log-equipment">${report.equipment} - ${report.location}</div>
-                        <div class="log-date">${date}</div>
-                    </div>
-                    <div class="log-details">
-                        <strong>Failure:</strong> ${report.failure_description.substring(0, 100)}...
-                    </div>
-                    <div class="log-actions">
-                        <button class="btn btn-danger btn-sm" onclick="deleteFailureReport('${report.id}')">
-                            <span>🗑️</span> Delete
-                        </button>
-                    </div>
+            document.getElementById('report-output').innerHTML = `
+                <div class="empty-state">
+                    <span>📊</span>
+                    <h4>No report generated yet</h4>
+                    <p>Select a month and click "Generate Report" to create a monthly performance report</p>
                 </div>
             `;
-        });
-        
-        reportList.innerHTML = html;
-    }
-    
-    // Add failure report
-    async function addFailureReport() {
-        if (!currentUser) {
-            showNotification('Please login first', 'error');
-            return;
+            
+            // Reset statistics
+            document.getElementById('stat-total-logs').textContent = '0';
+            document.getElementById('stat-this-month').textContent = '0';
+            document.getElementById('stat-failure-hours').textContent = '0';
         }
         
-        const failureReport = {
-            user_id: currentUser.id,
-            date: document.getElementById('failure-date').value,
-            location: document.getElementById('location').value,
-            facility: document.getElementById('facility').value,
-            equipment: document.getElementById('failure-equipment').value,
-            part_of_equipment: document.getElementById('part-of-equipment').value,
-            failure_category: document.getElementById('failure-category').value,
-            failure_description: document.getElementById('failure-description').value,
-            corrective_action: document.getElementById('corrective-action').value,
-            cause_of_failure: document.getElementById('cause-of-failure').value,
-            date_of_failure: document.getElementById('date-of-failure').value,
-            time_of_failure: document.getElementById('time-of-failure').value,
-            date_of_corrective_action: document.getElementById('date-of-corrective-action').value,
-            time_of_corrective_action: document.getElementById('time-of-corrective-action').value,
-            total_failure_hours: document.getElementById('total-failure-hours').value,
-            problem_code: document.getElementById('problem-code').value,
-            note: document.getElementById('note').value,
-            created_at: new Date().toISOString()
-        };
-        
-        try {
-            const { data, error } = await supabase
-                .from('failure_reports')
-                .insert([failureReport])
-                .select();
+        async function loadLogs() {
+            if (!currentUser) return;
             
-            if (error) throw error;
-            
-            // Clear form
-            document.querySelectorAll('#failure-report .form-control').forEach(input => {
-                if (input.type !== 'date' && input.type !== 'time' && input.id !== 'location' && input.id !== 'facility') {
-                    input.value = '';
-                }
-            });
-            
-            await loadFailureReports();
-            await updateSystemStats();
-            showNotification('Failure report created successfully!', 'success');
-        } catch (error) {
-            console.error('Error adding failure report:', error);
-            showNotification('Error creating failure report', 'error');
-        }
-    }
-    
-    // Delete failure report
-    async function deleteFailureReport(reportId) {
-        if (!confirm('Are you sure you want to delete this failure report?')) return;
-        
-        try {
-            const { error } = await supabase
-                .from('failure_reports')
-                .delete()
-                .eq('id', reportId)
-                .eq('user_id', currentUser.id);
-            
-            if (error) throw error;
-            
-            await loadFailureReports();
-            await updateSystemStats();
-            showNotification('Failure report deleted successfully!', 'success');
-        } catch (error) {
-            console.error('Error deleting failure report:', error);
-            showNotification('Error deleting failure report', 'error');
-        }
-    }
-    
-    // Generate monthly report
-    async function generateMonthlyReport() {
-        if (!currentUser) {
-            showNotification('Please login first', 'error');
-            return;
+            try {
+                const { data, error } = await supabase
+                    .from('logs')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+                
+                if (error) throw error;
+                
+                userData.logs = data || [];
+                displayLogs();
+            } catch (error) {
+                console.error('Error loading logs:', error);
+                showNotification('Error loading logs', 'error');
+            }
         }
         
-        const monthInput = document.getElementById('report-month').value;
-        if (!monthInput) {
-            showNotification('Please select a month first!', 'error');
-            return;
-        }
-        
-        const [year, month] = monthInput.split('-');
-        const monthNames = ["January", "February", "March", "April", "May", "June", 
-                           "July", "August", "September", "October", "November", "December"];
-        const monthName = monthNames[parseInt(month) - 1];
-        
-        // Update display
-        document.getElementById('report-month-display').textContent = `${monthName} ${year} - Facility Performance Report`;
-        
-        try {
-            // Get logs for the selected month
-            const startDate = new Date(year, month - 1, 1).toISOString();
-            const endDate = new Date(year, month, 0).toISOString();
+        function displayLogs() {
+            const logList = document.getElementById('log-list');
+            const logs = userData.logs || [];
             
-            const { data: monthLogs, error } = await supabase
-                .from('logs')
-                .select('*')
-                .eq('user_id', currentUser.id)
-                .gte('created_at', startDate)
-                .lte('created_at', endDate);
-            
-            if (error) throw error;
-            
-            if (!monthLogs || monthLogs.length === 0) {
-                document.getElementById('report-output').innerHTML = `
+            if (logs.length === 0) {
+                logList.innerHTML = `
                     <div class="empty-state">
-                        <span>📊</span>
-                        <h4>No data for ${monthName} ${year}</h4>
-                        <p>No log entries found for the selected month</p>
+                        <span>📝</span>
+                        <h4>No log entries yet</h4>
+                        <p>Add your first log entry using the form on the left</p>
                     </div>
                 `;
                 return;
             }
             
-            // Calculate days in month
-            const daysInMonth = new Date(year, month, 0).getDate();
-            
-            // Equipment list
-            const equipmentList = [
-                { id: "PSR", name: "PSR" },
-                { id: "MSSR-S", name: "MSSR-S" },
-                { id: "MSSR", name: "MSSR" },
-                { id: "SMR", name: "SMR" },
-                { id: "M-LAT", name: "M-LAT" },
-                { id: "ADS-B", name: "ADS-B" }
-            ];
-            
-            // Initialize report data
-            let reportData = {};
-            equipmentList.forEach(eq => {
-                reportData[eq.id] = {
-                    name: eq.name,
-                    days: {},
-                    totalFailureHours: 0,
-                    remarks: []
-                };
+            let html = '';
+            logs.forEach(log => {
+                const date = new Date(log.created_at).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
                 
-                for (let day = 1; day <= daysInMonth; day++) {
-                    reportData[eq.id].days[day] = {
-                        status: "O",
-                        failureHours: 0
-                    };
-                }
+                const statusClass = `status-${getStatusText(log.status).toLowerCase()}`;
+                const statusText = getStatusText(log.status);
+                
+                html += `
+                    <div class="log-item">
+                        <div class="log-header">
+                            <div class="log-equipment">${log.equipment}</div>
+                            <div class="log-date">${date}</div>
+                        </div>
+                        <div class="log-details">
+                            ${log.description}
+                            ${log.remarks ? `<br><br><strong>Remarks:</strong> ${log.remarks}` : ''}
+                            ${log.failure_hours ? `<br><br><strong>Failure Hours:</strong> ${log.failure_hours}` : ''}
+                        </div>
+                        <div class="log-status ${statusClass}">${statusText}</div>
+                        <div class="log-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteLog('${log.id}')">
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
             });
             
-            // Process each log
-            monthLogs.forEach(log => {
-                try {
+            logList.innerHTML = html;
+        }
+        
+        async function addLog() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const description = document.getElementById('log-description').value.trim();
+            const equipment = document.getElementById('equipment').value;
+            const status = document.getElementById('status').value;
+            const failureHours = parseFloat(document.getElementById('failure-hours').value) || 0;
+            const remarks = document.getElementById('remarks').value.trim();
+            
+            if (!description || !equipment || !status) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            showNotification('Adding log entry...', 'info');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('logs')
+                    .insert([{
+                        user_id: currentUser.id,
+                        description,
+                        equipment,
+                        status,
+                        failure_hours: failureHours,
+                        remarks,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Clear form
+                document.getElementById('log-description').value = '';
+                document.getElementById('equipment').value = '';
+                document.getElementById('status').value = '';
+                document.getElementById('failure-hours').value = '';
+                document.getElementById('remarks').value = '';
+                
+                // Reload data
+                await loadUserData();
+                showNotification('Log entry added successfully!', 'success');
+            } catch (error) {
+                console.error('Error adding log:', error);
+                showNotification('Error adding log entry', 'error');
+            }
+        }
+        
+        async function deleteLog(logId) {
+            if (!confirm('Are you sure you want to delete this log entry?')) return;
+            
+            showNotification('Deleting log entry...', 'info');
+            
+            try {
+                const { error } = await supabase
+                    .from('logs')
+                    .delete()
+                    .eq('id', logId)
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                await loadUserData();
+                showNotification('Log entry deleted!', 'success');
+            } catch (error) {
+                console.error('Error deleting log:', error);
+                showNotification('Error deleting log entry', 'error');
+            }
+        }
+        
+        async function loadFailureReports() {
+            if (!currentUser) return;
+            
+            try {
+                const { data, error } = await supabase
+                    .from('failure_reports')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .order('created_at', { ascending: false })
+                    .limit(20);
+                
+                if (error) throw error;
+                
+                userData.failureReports = data || [];
+                displayFailureReports();
+            } catch (error) {
+                console.error('Error loading failure reports:', error);
+                showNotification('Error loading failure reports', 'error');
+            }
+        }
+        
+        function displayFailureReports() {
+            const reportList = document.getElementById('failure-report-list');
+            const reports = userData.failureReports || [];
+            
+            if (reports.length === 0) {
+                reportList.innerHTML = `
+                    <div class="empty-state">
+                        <span>📋</span>
+                        <h4>No failure reports yet</h4>
+                        <p>Create your first failure report using the form on the left</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '';
+            reports.forEach(report => {
+                const date = new Date(report.date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+                
+                html += `
+                    <div class="log-item">
+                        <div class="log-header">
+                            <div class="log-equipment">${report.equipment}</div>
+                            <div class="log-date">${date}</div>
+                        </div>
+                        <div class="log-details">
+                            <strong>Location:</strong> ${report.location}<br>
+                            <strong>Description:</strong> ${report.failure_description.substring(0, 100)}...
+                            ${report.corrective_action ? `<br><strong>Action:</strong> ${report.corrective_action.substring(0, 100)}...` : ''}
+                        </div>
+                        <div class="log-actions">
+                            <button class="btn btn-danger btn-sm" onclick="deleteFailureReport('${report.id}')">
+                                <span>🗑️</span> Delete
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            reportList.innerHTML = html;
+        }
+        
+        async function addFailureReport() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const date = document.getElementById('failure-date').value;
+            const location = document.getElementById('failure-location').value;
+            const equipment = document.getElementById('failure-equipment').value;
+            const description = document.getElementById('failure-description').value.trim();
+            const action = document.getElementById('corrective-action').value.trim();
+            
+            if (!date || !location || !equipment || !description || !action) {
+                showNotification('Please fill in all required fields', 'error');
+                return;
+            }
+            
+            showNotification('Creating failure report...', 'info');
+            
+            try {
+                const { data, error } = await supabase
+                    .from('failure_reports')
+                    .insert([{
+                        user_id: currentUser.id,
+                        date,
+                        location,
+                        equipment,
+                        failure_description: description,
+                        corrective_action: action,
+                        created_at: new Date().toISOString()
+                    }])
+                    .select();
+                
+                if (error) throw error;
+                
+                // Clear form
+                document.getElementById('failure-description').value = '';
+                document.getElementById('corrective-action').value = '';
+                
+                await loadUserData();
+                showNotification('Failure report created!', 'success');
+            } catch (error) {
+                console.error('Error adding failure report:', error);
+                showNotification('Error creating failure report', 'error');
+            }
+        }
+        
+        async function deleteFailureReport(reportId) {
+            if (!confirm('Are you sure you want to delete this failure report?')) return;
+            
+            showNotification('Deleting failure report...', 'info');
+            
+            try {
+                const { error } = await supabase
+                    .from('failure_reports')
+                    .delete()
+                    .eq('id', reportId)
+                    .eq('user_id', currentUser.id);
+                
+                if (error) throw error;
+                
+                await loadUserData();
+                showNotification('Failure report deleted!', 'success');
+            } catch (error) {
+                console.error('Error deleting failure report:', error);
+                showNotification('Error deleting failure report', 'error');
+            }
+        }
+        
+        async function generateMonthlyReport() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const monthInput = document.getElementById('report-month').value;
+            if (!monthInput) {
+                showNotification('Please select a month', 'error');
+                return;
+            }
+            
+            showNotification('Generating report...', 'info');
+            
+            const [year, month] = monthInput.split('-');
+            const monthNames = ["January", "February", "March", "April", "May", "June", 
+                              "July", "August", "September", "October", "November", "December"];
+            const monthName = monthNames[parseInt(month) - 1];
+            
+            try {
+                const startDate = new Date(year, month - 1, 1);
+                const endDate = new Date(year, month, 0);
+                
+                const { data: logs, error } = await supabase
+                    .from('logs')
+                    .select('*')
+                    .eq('user_id', currentUser.id)
+                    .gte('created_at', startDate.toISOString())
+                    .lte('created_at', endDate.toISOString());
+                
+                if (error) throw error;
+                
+                if (!logs || logs.length === 0) {
+                    document.getElementById('report-output').innerHTML = `
+                        <div class="empty-state">
+                            <span>📊</span>
+                            <h4>No data for ${monthName} ${year}</h4>
+                            <p>No log entries found for the selected month</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Calculate statistics
+                const daysInMonth = endDate.getDate();
+                const equipmentList = ['PSR', 'MSSR-S', 'MSSR', 'SMR', 'M-LAT', 'ADS-B'];
+                const reportData = {};
+                
+                // Initialize report data
+                equipmentList.forEach(eq => {
+                    reportData[eq] = {
+                        name: eq,
+                        days: {},
+                        totalFailure: 0,
+                        remarks: []
+                    };
+                    
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        reportData[eq].days[day] = 'O'; // Default to normal
+                    }
+                });
+                
+                // Process logs
+                logs.forEach(log => {
                     const day = new Date(log.created_at).getDate();
                     const eq = log.equipment;
                     
                     if (reportData[eq]) {
-                        // Update status for the day
-                        const currentStatus = reportData[eq].days[day].status;
-                        const statusPriority = { "X": 4, "-": 3, "V": 2, "O": 1 };
-                        if (statusPriority[log.status] > statusPriority[currentStatus]) {
-                            reportData[eq].days[day].status = log.status;
-                        }
-                        
-                        // Add failure hours
-                        reportData[eq].days[day].failureHours += (log.failure_hours || 0);
-                        reportData[eq].totalFailureHours += (log.failure_hours || 0);
-                        
-                        // Collect remarks
+                        reportData[eq].days[day] = log.status;
+                        reportData[eq].totalFailure += (log.failure_hours || 0);
                         if (log.remarks) {
-                            reportData[eq].remarks.push(`${day}/${month}: ${log.remarks}`);
+                            reportData[eq].remarks.push(`Day ${day}: ${log.remarks}`);
                         }
                     }
-                } catch (e) {
-                    console.error('Error processing log:', e);
-                }
-            });
-            
-            // Generate report HTML
-            let reportHTML = `
-                <div class="report-title">
-                    <h2>FACILITY PERFORMANCE MONTHLY REPORT</h2>
-                    <h3>AIRPORT: SALALAH | FACILITY: RADAR | MONTH: ${monthName.toUpperCase()} ${year}</h3>
-                </div>
+                });
                 
-                <div class="report-container">
-                    <table class="report-table">
-                        <thead>
-                            <tr>
-                                <th>NO.</th>
-                                <th>EQUIPMENT NAME</th>
-            `;
-            
-            // Add day headers
-            for (let day = 1; day <= daysInMonth; day++) {
-                reportHTML += `<th>${day}</th>`;
-            }
-            
-            reportHTML += `
-                                <th>TOTAL HOURS OF FAILURE</th>
-                                <th>REMARK</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-            
-            // Add equipment rows
-            equipmentList.forEach((eq, index) => {
-                const data = reportData[eq.id];
+                // Generate report HTML
+                let html = `
+                    <h3 style="margin-bottom: 20px; color: #1a237e;">${monthName} ${year} Performance Report</h3>
+                    <div class="report-container">
+                        <table class="report-table">
+                            <thead>
+                                <tr>
+                                    <th>Equipment</th>
+                `;
                 
-                reportHTML += `<tr>`;
-                reportHTML += `<td>${index + 1}</td>`;
-                reportHTML += `<td>${eq.name}</td>`;
-                
-                // Add day cells with colors
+                // Day headers
                 for (let day = 1; day <= daysInMonth; day++) {
-                    const dayStatus = data.days[day].status;
-                    reportHTML += `<td><div class="status-cell status-${dayStatus}">${dayStatus}</div></td>`;
+                    html += `<th>${day}</th>`;
                 }
                 
-                // Add total failure hours
-                reportHTML += `<td style="font-weight: bold; background: ${data.totalFailureHours > 0 ? '#f8d7da' : '#d4edda'};">${data.totalFailureHours}</td>`;
+                html += `
+                                    <th>Failure Hrs</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
                 
-                // Add remarks
-                const remarks = data.remarks.slice(0, 2).join("; ");
-                reportHTML += `<td>${remarks}${data.remarks.length > 2 ? "..." : ""}</td>`;
+                // Equipment rows
+                equipmentList.forEach(eq => {
+                    const data = reportData[eq];
+                    html += `<tr><td><strong>${eq}</strong></td>`;
+                    
+                    for (let day = 1; day <= daysInMonth; day++) {
+                        const status = data.days[day];
+                        const statusClass = status === 'O' ? 'status-normal' : 
+                                          status === '-' ? 'status-intermittent' :
+                                          status === 'X' ? 'status-failure' : 'status-disruption';
+                        html += `<td><div class="status-cell ${statusClass}">${status}</div></td>`;
+                    }
+                    
+                    html += `<td>${data.totalFailure}</td>`;
+                    html += `<td>${data.remarks.slice(0, 3).join('; ')}${data.remarks.length > 3 ? '...' : ''}</td>`;
+                    html += `</tr>`;
+                });
                 
-                reportHTML += `</tr>`;
-            });
-            
-            reportHTML += `</tbody></table></div>`;
-            
-            // Add statistics
-            let totalFailures = 0;
-            let equipmentWithIssues = 0;
-            
-            equipmentList.forEach(eq => {
-                const data = reportData[eq.id];
-                totalFailures += (data.totalFailureHours || 0);
-                const hasIssues = Object.values(data.days).some(day => day.status !== "O");
-                if (hasIssues) equipmentWithIssues++;
-            });
-            
-            reportHTML += `
-                <div style="margin-top: 30px; padding: 20px; background: #f8f9fa; border-radius: 8px;">
-                    <h4 style="color: #243b55; margin-bottom: 15px;">Monthly Summary</h4>
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-                        <div style="padding: 10px; background: white; border-radius: 6px; text-align: center;">
-                            <div style="font-size: 12px; color: #6c757d;">Total Log Entries</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #243b55;">${monthLogs.length}</div>
+                html += `</tbody></table></div>`;
+                
+                // Summary statistics
+                const totalEntries = logs.length;
+                const totalFailureHours = logs.reduce((sum, log) => sum + (log.failure_hours || 0), 0);
+                const equipmentWithIssues = equipmentList.filter(eq => 
+                    Object.values(reportData[eq].days).some(status => status !== 'O')
+                ).length;
+                
+                html += `
+                    <div style="margin-top: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                        <div class="stat-card">
+                            <div class="stat-label">Total Entries</div>
+                            <div class="stat-value">${totalEntries}</div>
                         </div>
-                        <div style="padding: 10px; background: white; border-radius: 6px; text-align: center;">
-                            <div style="font-size: 12px; color: #6c757d;">Total Failure Hours</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #dc3545;">${totalFailures}</div>
+                        <div class="stat-card">
+                            <div class="stat-label">Failure Hours</div>
+                            <div class="stat-value">${totalFailureHours}</div>
                         </div>
-                        <div style="padding: 10px; background: white; border-radius: 6px; text-align: center;">
-                            <div style="font-size: 12px; color: #6c757d;">Equipment with Issues</div>
-                            <div style="font-size: 24px; font-weight: bold; color: #ffc107;">${equipmentWithIssues}</div>
+                        <div class="stat-card">
+                            <div class="stat-label">Equipment Issues</div>
+                            <div class="stat-value">${equipmentWithIssues}</div>
                         </div>
                     </div>
-                </div>
-            `;
-            
-            // Display report
-            document.getElementById('report-output').innerHTML = reportHTML;
-            
-        } catch (error) {
-            console.error('Error generating report:', error);
-            showNotification('Error generating report', 'error');
-        }
-    }
-    
-    // Update system statistics
-    async function updateSystemStats() {
-        if (!currentUser) return;
-        
-        try {
-            // Get current month data
-            const today = new Date();
-            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1).toISOString();
-            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString();
-            
-            // Get logs count
-            const { data: logsData, error: logsError } = await supabase
-                .from('logs')
-                .select('id, failure_hours, created_at')
-                .eq('user_id', currentUser.id);
-            
-            if (logsError) throw logsError;
-            
-            // Get this month logs
-            const thisMonthLogs = logsData.filter(log => {
-                const logDate = new Date(log.created_at);
-                return logDate >= new Date(startOfMonth) && logDate <= new Date(endOfMonth);
-            });
-            
-            // Calculate total failure hours
-            const totalFailureHours = logsData.reduce((sum, log) => sum + (log.failure_hours || 0), 0);
-            
-            // Update UI
-            document.getElementById('stat-total-logs').textContent = logsData.length;
-            document.getElementById('stat-this-month').textContent = thisMonthLogs.length;
-            document.getElementById('stat-failure-hours').textContent = totalFailureHours;
-            
-            // Update recent activity
-            const recentActivity = document.getElementById('recent-activity');
-            if (recentActivity) {
-                const recentLogs = logsData.slice(0, 5);
+                `;
                 
-                let html = '<ul style="list-style: none; padding: 0;">';
-                recentLogs.forEach(log => {
-                    const date = new Date(log.created_at).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                    });
-                    
-                    html += `
-                        <li style="margin-bottom: 10px; padding-bottom: 10px; border-bottom: 1px solid #f0f0f0;">
-                            <div><strong>📝</strong> - ${date}</div>
-                            <div style="font-size: 12px; color: #6c757d;">Log entry recorded</div>
-                        </li>
-                    `;
-                });
-                html += '</ul>';
-                recentActivity.innerHTML = html;
+                document.getElementById('report-output').innerHTML = html;
+                document.getElementById('report-month-display').textContent = `${monthName} ${year} Report`;
+                
+                showNotification('Report generated successfully!', 'success');
+            } catch (error) {
+                console.error('Error generating report:', error);
+                showNotification('Error generating report', 'error');
+            }
+        }
+        
+        async function updateStatistics() {
+            if (!currentUser) return;
+            
+            try {
+                const { data: logs } = await supabase
+                    .from('logs')
+                    .select('created_at, failure_hours')
+                    .eq('user_id', currentUser.id);
+                
+                if (!logs) return;
+                
+                // Calculate statistics
+                const totalLogs = logs.length;
+                const now = new Date();
+                const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+                
+                const thisMonthLogs = logs.filter(log => 
+                    new Date(log.created_at) >= thisMonth
+                ).length;
+                
+                const totalFailureHours = logs.reduce((sum, log) => 
+                    sum + (log.failure_hours || 0), 0
+                );
+                
+                // Update UI
+                document.getElementById('stat-total-logs').textContent = totalLogs;
+                document.getElementById('stat-this-month').textContent = thisMonthLogs;
+                document.getElementById('stat-failure-hours').textContent = totalFailureHours;
+            } catch (error) {
+                console.error('Error updating statistics:', error);
+            }
+        }
+        
+        function updateRecentActivity() {
+            const activityDiv = document.getElementById('recent-activity');
+            const logs = userData.logs || [];
+            const reports = userData.failureReports || [];
+            
+            const allActivities = [
+                ...logs.map(log => ({
+                    type: 'log',
+                    date: new Date(log.created_at),
+                    text: `Log: ${log.equipment} - ${log.description.substring(0, 50)}...`
+                })),
+                ...reports.map(report => ({
+                    type: 'report',
+                    date: new Date(report.date),
+                    text: `Failure: ${report.equipment} at ${report.location}`
+                }))
+            ];
+            
+            allActivities.sort((a, b) => b.date - a.date);
+            const recent = allActivities.slice(0, 10);
+            
+            if (recent.length === 0) {
+                activityDiv.innerHTML = `
+                    <div class="empty-state">
+                        <span>🔄</span>
+                        <p>No recent activity</p>
+                    </div>
+                `;
+                return;
             }
             
-        } catch (error) {
-            console.error('Error updating stats:', error);
-        }
-    }
-    
-    // Export to Excel
-    async function exportToExcel() {
-        if (!currentUser) {
-            showNotification('Please login first', 'error');
-            return;
-        }
-        
-        const monthInput = document.getElementById('report-month').value;
-        if (!monthInput) {
-            showNotification('Please generate a report first!', 'error');
-            return;
-        }
-        
-        // Simple CSV export
-        const table = document.querySelector('.report-table');
-        if (!table) {
-            showNotification('No report table found!', 'error');
-            return;
-        }
-        
-        let csv = [];
-        const rows = table.querySelectorAll('tr');
-        
-        rows.forEach(row => {
-            const rowData = [];
-            const cells = row.querySelectorAll('th, td');
-            
-            cells.forEach(cell => {
-                let cellText = cell.textContent || cell.innerText;
-                cellText = cellText.trim();
-                cellText = cellText.replace(/"/g, '""');
-                if (cellText.includes(',')) {
-                    cellText = `"${cellText}"`;
-                }
-                rowData.push(cellText);
+            let html = '';
+            recent.forEach(activity => {
+                const timeAgo = getTimeAgo(activity.date);
+                html += `
+                    <div class="log-item">
+                        <div class="log-header">
+                            <div class="log-equipment">${activity.type === 'log' ? '📝' : '🚨'} ${activity.type.toUpperCase()}</div>
+                            <div class="log-date">${timeAgo}</div>
+                        </div>
+                        <div class="log-details">${activity.text}</div>
+                    </div>
+                `;
             });
             
-            csv.push(rowData.join(','));
-        });
-        
-        const csvContent = 'data:text/csv;charset=utf-8,' + csv.join('\n');
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', `facility_report_${monthInput}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        showNotification('Report exported to CSV successfully!', 'success');
-    }
-    
-    // Print report
-    function printReport() {
-        const reportOutput = document.getElementById('report-output');
-        if (!reportOutput || reportOutput.innerHTML.includes('empty-state')) {
-            showNotification('Please generate a report first!', 'error');
-            return;
+            activityDiv.innerHTML = html;
         }
         
-        const printContent = `
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <title>Facility Performance Report</title>
-                <style>
-                    body { font-family: Arial, sans-serif; margin: 20px; }
-                    .report-table { width: 100%; border-collapse: collapse; }
-                    .report-table th, .report-table td { border: 1px solid #000; padding: 8px; text-align: center; }
-                    .status-cell { font-weight: bold; padding: 5px; border-radius: 3px; }
-                    .status-O { background-color: #90ee90; }
-                    .status-- { background-color: #ffff99; }
-                    .status-X { background-color: #ff9999; }
-                    .status-V { background-color: #99ccff; }
-                </style>
-            </head>
-            <body>
-                ${reportOutput.innerHTML}
-            </body>
-            </html>
-        `;
-        
-        const printWindow = window.open('', '_blank');
-        printWindow.document.write(printContent);
-        printWindow.document.close();
-        printWindow.print();
-    }
-    
-    // Switch tabs
-    function switchTab(tabName) {
-        if (!currentUser && tabName !== 'daily-log') {
-            showNotification('Please login to access this feature', 'error');
-            return;
+        function getTimeAgo(date) {
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 60) return `${diffMins}m ago`;
+            if (diffHours < 24) return `${diffHours}h ago`;
+            if (diffDays < 7) return `${diffDays}d ago`;
+            return date.toLocaleDateString();
         }
         
-        // Update tab buttons
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-        event.target.classList.add('active');
-        
-        // Update tab content in sidebar
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.getElementById(tabName).classList.add('active');
-        
-        // Update main content
-        document.querySelectorAll('.main-content .tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-        document.getElementById(tabName + '-content').classList.add('active');
-        
-        // Load data if needed
-        if (tabName === 'monthly-report') {
-            document.getElementById('report-month-display').textContent = 'Select a month to generate report';
+        function getStatusText(status) {
+            switch(status) {
+                case 'O': return 'Normal';
+                case '-': return 'Intermittent';
+                case 'X': return 'Failure';
+                case 'V': return 'Disruption';
+                default: return status;
+            }
         }
-    }
-    
-    // Get status text
-    function getStatusText(statusCode) {
-        switch(statusCode) {
-            case 'O': return 'Normal';
-            case '-': return 'Intermittent';
-            case 'X': return 'Failure';
-            case 'V': return 'Disruption';
-            default: return statusCode;
-        }
-    }
-    
-    // Show notification
-    function showNotification(message, type) {
-        const notification = document.getElementById('notification');
-        notification.textContent = message;
-        notification.style.background = type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#17a2b8';
-        notification.style.display = 'block';
         
-        setTimeout(() => {
-            notification.style.animation = 'slideOut 0.3s ease';
+        function switchTab(tabName) {
+            if (!currentUser && tabName !== 'daily-log') {
+                showNotification('Please login to access this feature', 'error');
+                return;
+            }
+            
+            // Update active tab button
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            document.getElementById(tabName + '-content').classList.add('active');
+        }
+        
+        function exportToCSV() {
+            const reportTable = document.querySelector('.report-table');
+            if (!reportTable) {
+                showNotification('Generate a report first', 'error');
+                return;
+            }
+            
+            let csv = [];
+            const rows = reportTable.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('th, td');
+                
+                cells.forEach(cell => {
+                    let text = cell.innerText.replace(/\n/g, ' ');
+                    text = text.replace(/"/g, '""');
+                    rowData.push(`"${text}"`);
+                });
+                
+                csv.push(rowData.join(','));
+            });
+            
+            const csvContent = 'data:text/csv;charset=utf-8,' + csv.join('\n');
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute('href', encodedUri);
+            link.setAttribute('download', 'facility_report.csv');
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Report exported as CSV', 'success');
+        }
+        
+        function printReport() {
+            const reportContainer = document.querySelector('.report-container');
+            if (!reportContainer) {
+                showNotification('Generate a report first', 'error');
+                return;
+            }
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>Facility Performance Report</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; margin: 20px; }
+                            table { width: 100%; border-collapse: collapse; }
+                            th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+                            .status-cell { font-weight: bold; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>Facility Performance Report</h1>
+                        ${reportContainer.outerHTML}
+                        <p style="margin-top: 30px; text-align: right; font-size: 12px;">
+                            Generated on ${new Date().toLocaleDateString()}
+                        </p>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        function exportAllData() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            const data = {
+                user: currentUser.email,
+                exportDate: new Date().toISOString(),
+                logs: userData.logs || [],
+                failureReports: userData.failureReports || []
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', `facility_data_${new Date().toISOString().split('T')[0]}.json`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showNotification('Data exported successfully', 'success');
+        }
+        
+        async function clearOldData() {
+            if (!currentUser) {
+                showNotification('Please login first', 'error');
+                return;
+            }
+            
+            if (!confirm('Delete all data older than 30 days? This cannot be undone.')) {
+                return;
+            }
+            
+            showNotification('Clearing old data...', 'info');
+            
+            try {
+                const thirtyDaysAgo = new Date();
+                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+                
+                // Delete old logs
+                const { error: logsError } = await supabase
+                    .from('logs')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .lt('created_at', thirtyDaysAgo.toISOString());
+                
+                if (logsError) throw logsError;
+                
+                // Delete old failure reports
+                const { error: reportsError } = await supabase
+                    .from('failure_reports')
+                    .delete()
+                    .eq('user_id', currentUser.id)
+                    .lt('created_at', thirtyDaysAgo.toISOString());
+                
+                if (reportsError) throw reportsError;
+                
+                await loadUserData();
+                showNotification('Old data cleared successfully', 'success');
+            } catch (error) {
+                console.error('Error clearing old data:', error);
+                showNotification('Error clearing old data', 'error');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
+            
             setTimeout(() => {
                 notification.style.display = 'none';
-                notification.style.animation = '';
-            }, 300);
-        }, 3000);
-    }
-    
-    // Initialize app on load
-    window.addEventListener('DOMContentLoaded', initApp);
-</script>
+            }, 3000);
+        }
+        
+        // Handle Enter key in forms
+        document.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                const activeElement = document.activeElement;
+                if (activeElement.closest('#daily-log')) {
+                    event.preventDefault();
+                    addLog();
+                } else if (activeElement.closest('#failure-report')) {
+                    event.preventDefault();
+                    addFailureReport();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
